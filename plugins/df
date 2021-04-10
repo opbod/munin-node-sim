@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+"""df.py: provides Munin output for file """
+
+__author__ = "Opbod"
+__copyright__ = "MIT"
+
+import subprocess
+import sys
+
+WARNING = 92
+CRITICAL = 97
+
+ignore_filesystems = ['devfs', 'fdescfs', 'tmpfs']
+
+# This is only executed when this file is called directly.
+if __name__ == "__main__":
+
+    try:
+        proc = subprocess.run(["/bin/df"], check=True, stdout=subprocess.PIPE, universal_newlines=True, encoding='utf-8')
+    except OSError:
+        print("Error executing command")
+
+    config = []
+    values = []
+
+    # First provide some guidance on how to build the graphs
+    config.append("graph_title Filesystem usage (in %)")
+    config.append("graph_category disk")
+    config.append("graph_info This graph shows disk usage on the machine.")
+    config.append("graph_args --upper-limit 100 -l 0")
+    config.append("graph_scale no")
+    config.append("graph_vlabel %")
+
+    # Now go over the "df" output:
+    for line in proc.stdout.split('\n'):
+        # We're only interested in the 'physical' item, not the jails created underneath.
+        # Furthermore we ignore certain filesystems (configuration above).
+        if "/" not in line.split(" ")[0] and line.split(" ")[0] not in ignore_filesystems:
+            try:
+                # First split on the last space found, keeping the final part (e.g. /vmfs/volumes/NVMe1TB_1).
+                mount_point = line.rsplit(" ", 1)[1]
+                # For the internal name, use the mount point name and replace slashes with underscores.
+                # For the label, split mount point on the last '/', keeping the final part (e.g. NVMe1TB_1).
+                config.append("{}.label {}".format(mount_point.replace("/", "_"), mount_point.rsplit("/", 1)[1]))
+                config.append("{}.warning {}".format(mount_point.replace("/", "_"), WARNING))
+                config.append("{}.critical {}".format(mount_point.replace("/", "_"), CRITICAL))
+
+                # For the Value part, have a look at the one but last item in the line
+                value_percent = line.rsplit()[-2]
+
+                # Remove the "%" sign
+                values.append(value_percent[:-1])
+
+            # If there's no match, let's not return anything.
+            except IndexError:
+                pass
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "config":
+            print(*config, sep="\r\n")
+    else:
+        print(*values, sep="\r\n")
