@@ -93,12 +93,21 @@ Now try to execute the Munin plugin manually as a test:
 	munin@MonServ:~$ /usr/share/munin/munin-update --debug --nofork --host TrueNAS-v1.mydomain.com
 	→ should work and yield output as “FETCH from <service>”
 
-## Plugins
+## Included plugins
 
-Some example plugins are included (feel free to add more) but it should be possible to use any TrueNAS compatible plugin (e.g. `ip_host` from https://github.com/farrokhi/freebsd-munin-plugins); feel free to update the list with supported ones.
+Some example plugins are included for use on TrueNAS (feel free to add more).
 
 - `df`: Python script plugin that shows disk usage in % of the disk pools
 - `load`: Shell script plugin that shows the 5 minute average
+
+## Supported plugins
+It should be possible to use any TrueNAS compatible plugin. Feel free to update the below list with supported ones or add them to the plugins/ directory in this repo.
+
+- Generic FreeBSD Munin plugins from https://github.com/munin-monitoring/munin/tree/master/plugins/node.d.freebsd
+- ZFS related plugins from https://github.com/freebsd/freebsd-ports/tree/main/sysutils/munin-node/plugins
+- NUT plugin from https://github.com/munin-monitoring/contrib/blob/master/plugins/power/nut (plugin filename: nut_ups_AT_localhost)
+   - Add battery.runtime if required
+- ip_host, ip_drops, ip_forwarding from https://github.com/farrokhi/freebsd-munin-plugins
 
 ## License
 
