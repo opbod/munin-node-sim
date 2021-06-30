@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Verify the plugins/ directory exists
     try:
-        os.chdir("plugins/")
+        os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/plugins/")
     except FileNotFoundError:
         print("ERROR: plugins/ directory not found, exiting")
         sys.exit(1)
