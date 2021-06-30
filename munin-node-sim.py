@@ -44,6 +44,7 @@ if __name__ == '__main__':
             return False
         except PermissionError:
             print("ERROR: not the right permissions")
+            return False
 
         plugin_args.append(plugin_name)  # The filename is the second argument to provide
 
