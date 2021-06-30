@@ -26,6 +26,7 @@ if __name__ == '__main__':
 
     def execute_plugin(plugin_name, config=""):
 
+        plugin_name = os.path.basename(plugin_name)
         plugin_args = []
 
         if not plugin_name:
