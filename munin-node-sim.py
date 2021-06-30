@@ -55,8 +55,12 @@ if __name__ == '__main__':
         if config:
             plugin_args.append(config)
 
-        # Run the process, capturing the stdout output (pipe) and outputting as string (universal_newlines)
-        return subprocess.run(plugin_args, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        try:
+            # Run the process, capturing the stdout output (pipe) and outputting as string (universal_newlines)
+            return subprocess.run(plugin_args, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        except subprocess.CalledProcessError as e:
+            print("ERROR: Plugin returned non-zero exit status " + str(e.returncode))
+            return False
 
     # Verify the plugins/ directory exists
     try:
