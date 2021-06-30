@@ -34,8 +34,13 @@ if __name__ == '__main__':
             return False
 
         try:
-            interpreter = open(plugin_name).readline().replace("#!", "").strip().split()[-1]
-            plugin_args.append(interpreter)  # The interpreter found in the plugin is the first argument
+            # Plugin executable? Otherwise extract shebang.
+            if os.access(plugin_name, os.X_OK):
+                plugin_args.append("./" + plugin_name)
+            else:
+                interpreter = open(plugin_name).readline().replace("#!", "").strip().split()[-1]
+                plugin_args.append(interpreter)  # The interpreter found in the plugin is the first argument
+                plugin_args.append(plugin_name)  # The filename is the second argument to provide
         except FileNotFoundError:
             print("ERROR: plugin file not found in the plugins/ directory")
             return False
@@ -45,8 +50,6 @@ if __name__ == '__main__':
         except PermissionError:
             print("ERROR: not the right permissions")
             return False
-
-        plugin_args.append(plugin_name)  # The filename is the second argument to provide
 
         # Pass the 'config' argument to the plugin if required as a third and final argument
         if config:
