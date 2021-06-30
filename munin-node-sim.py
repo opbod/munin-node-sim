@@ -61,6 +61,9 @@ if __name__ == '__main__':
         except subprocess.CalledProcessError as e:
             print("ERROR: Plugin returned non-zero exit status " + str(e.returncode))
             return False
+        except OSError:
+            print("ERROR: Could not execute plugin (maybe missing shebang?)")
+            return False
 
     # Verify the plugins/ directory exists
     try:
