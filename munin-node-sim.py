@@ -26,38 +26,50 @@ if __name__ == '__main__':
 
     def execute_plugin(plugin_name, config=""):
 
+        plugin_name = os.path.basename(plugin_name)
         plugin_args = []
 
         if not plugin_name:
-            print("ERROR: plugin name not provided")
+            print("# ERROR: Plugin name not provided.")
             return False
 
         try:
-            interpreter = open(plugin_name).readline().replace("#!", "").strip().split()[-1]
-            plugin_args.append(interpreter)  # The interpreter found in the plugin is the first argument
+            # Plugin executable? Otherwise extract shebang.
+            if os.access(plugin_name, os.X_OK):
+                plugin_args.append("./" + plugin_name)
+            else:
+                interpreter = open(plugin_name).readline().replace("#!", "").strip().split()[-1]
+                plugin_args.append(interpreter)  # The interpreter found in the plugin is the first argument
+                plugin_args.append(plugin_name)  # The filename is the second argument to provide
         except FileNotFoundError:
-            print("ERROR: plugin file not found in the plugins/ directory")
+            print("# ERROR: Plugin file not found in the plugins directory.")
             return False
         except IndexError:
-            print("ERROR: no valid Shebang found in the plugin")
+            print("# ERROR: No valid Shebang found in the plugin.")
             return False
         except PermissionError:
-            print("ERROR: not the right permissions")
-
-        plugin_args.append(plugin_name)  # The filename is the second argument to provide
+            print("# ERROR: Not the right permissions.")
+            return False
 
         # Pass the 'config' argument to the plugin if required as a third and final argument
         if config:
             plugin_args.append(config)
 
-        # Run the process, capturing the stdout output (pipe) and outputting as string (universal_newlines)
-        return subprocess.run(plugin_args, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        try:
+            # Run the process, capturing the stdout output (pipe) and outputting as string (universal_newlines)
+            return subprocess.run(plugin_args, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        except subprocess.CalledProcessError as e:
+            print("# ERROR: Plugin returned non-zero exit status %d." % e.returncode)
+            return False
+        except OSError:
+            print("# ERROR: Could not execute plugin. (Maybe missing shebang?)")
+            return False
 
     # Verify the plugins/ directory exists
     try:
-        os.chdir("plugins/")
+        os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/plugins/")
     except FileNotFoundError:
-        print("ERROR: plugins/ directory not found, exiting")
+        print("# ERROR: Plugins directory not found, exiting.")
         sys.exit(1)
 
     # Get all files in the plugins/ directory and consider them as Munin plugins
