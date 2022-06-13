@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 value_percent = line.rsplit()[-2]
 
                 # Remove the "%" sign
-                values.append(value_percent[:-1])
+                values.append("{}.value {}".format(mount_point.replace("/", "_"), value_percent[:-1]))
 
             # If there's no match, let's not return anything.
             except IndexError:
